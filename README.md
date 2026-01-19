@@ -22,3 +22,7 @@ A lightweight, elegant, and functional music player built with HTML5, CSS3, and 
            cover: "image-url.jpg"
        }
    ];
+
+<img width="1468" height="828" alt="Screenshot 2026-01-19 at 20 19 11" src="https://github.com/user-attachments/assets/cf724824-1620-4ad4-a570-f8379e8a195c" />
+
+
