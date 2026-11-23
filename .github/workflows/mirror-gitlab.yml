@@ -1,0 +1,67 @@
+name: Mirror to GitLab
+
+# Keeps https://gitlab.com/aaronkuyucu/music-player in sync with this
+# repository. GitLab Free has no pull mirroring, so GitHub pushes.
+on:
+  push:
+    branches: ['**']
+    tags: ['**']
+  delete:
+  schedule:
+    # Hourly, so branches that do not contain this file are synced too.
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One mirror run at a time; later runs wait instead of overtaking.
+concurrency:
+  group: mirror-gitlab
+  cancel-in-progress: false
+
+env:
+  GITLAB_REPO: git@gitlab.com:aaronkuyucu/music-player.git
+  # Published SHA256 fingerprint of gitlab.com's ED25519 host key
+  # (https://docs.gitlab.com/user/gitlab_com/#ssh-host-keys-fingerprints).
+  GITLAB_ED25519_FP: SHA256:eUXGGm1YGsMAS7vkcx6JOJdOGHPem5gQp4taiCfCLB8
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Trust gitlab.com host key
+        run: |
+          install -d -m 700 ~/.ssh
+          ssh-keyscan -t ed25519 gitlab.com > ~/.ssh/known_hosts
+          fp=$(ssh-keygen -lf ~/.ssh/known_hosts | awk '{print $2}')
+          if [ "$fp" != "$GITLAB_ED25519_FP" ]; then
+            echo "::error::Unexpected gitlab.com host key: $fp"
+            exit 1
+          fi
+
+      - name: Install deploy key
+        env:
+          GITLAB_MIRROR_KEY: ${{ secrets.GITLAB_MIRROR_KEY }}
+        run: |
+          printf '%s\n' "$GITLAB_MIRROR_KEY" > ~/.ssh/gitlab_mirror
+          chmod 600 ~/.ssh/gitlab_mirror
+
+      - name: Clone bare mirror from GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git clone --mirror \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo.git
+          # Pull request refs are GitHub-only and must not reach GitLab.
+          git -C repo.git for-each-ref --format='delete %(refname)' refs/pull \
+            | git -C repo.git update-ref --stdin
+
+      - name: Push branches and tags to GitLab
+        env:
+          GIT_SSH_COMMAND: ssh -i ~/.ssh/gitlab_mirror -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes
+        run: |
+          git -C repo.git push --prune "$GITLAB_REPO" \
+            '+refs/heads/*:refs/heads/*' \
+            '+refs/tags/*:refs/tags/*'
