@@ -7,6 +7,7 @@
     --ink: #14161c;
     --muted: #5b6270;
     --line: #e4e6ee;
+    --track: #8a90a0;
     --accent: #4f46e5;
     --accent-hover: #4338ca;
     --accent-soft: #eef0ff;
@@ -157,13 +158,13 @@ input {
 .seek::-webkit-slider-runnable-track {
     height: 6px;
     border-radius: 3px;
-    background: linear-gradient(to right, var(--accent) var(--played, 0%), var(--line) var(--played, 0%));
+    background: linear-gradient(to right, var(--accent) var(--played, 0%), var(--track) var(--played, 0%));
 }
 
 .seek::-moz-range-track {
     height: 6px;
     border-radius: 3px;
-    background: var(--line);
+    background: var(--track);
 }
 
 .seek::-moz-range-progress {
@@ -236,12 +237,12 @@ input {
 }
 
 /* One of the two icons is visible, depending on the state. */
-.icon-pause,
-.player.is-playing .icon-play {
+.play-btn .icon-pause,
+.player.is-playing .play-btn .icon-play {
     display: none;
 }
 
-.player.is-playing .icon-pause {
+.player.is-playing .play-btn .icon-pause {
     display: block;
 }
 
