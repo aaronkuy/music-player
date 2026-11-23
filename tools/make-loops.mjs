@@ -192,7 +192,7 @@ class Mix {
     }
 }
 
-// Schroeder reverb: six damped comb filters and two all-pass filters per side.
+// Schroeder-style reverb: six damped comb filters and two all-pass filters per side.
 function reverbChannel(input, offset, feedback, damping) {
     const out = new Float32Array(input.length);
     for (const delay of [1557, 1617, 1491, 1422, 1277, 1356]) {
