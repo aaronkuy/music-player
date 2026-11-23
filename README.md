@@ -70,7 +70,7 @@ The tests cover the calculations in `playlist.js` and check that every file name
 
 - Checked in Chrome only. Safari and Firefox are untested.
 - Seeking needs a server that answers range requests. GitHub Pages does; some simple local servers do not, and the position then jumps back to the start. Opening `index.html` from disk works.
-- No volume control and no Media Session integration (lock screen and media keys show no track title).
+- No volume control and no Media Session integration (the lock screen and the system media controls show no track title).
 - The playlist is fixed in `playlist.js`.
 
 ## Credits
